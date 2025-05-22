@@ -1,67 +1,85 @@
 #include <Servo.h>
+
 Servo gripper, armdown, armup, rotator;
 
-
+// current positions
+int CG = 0, CAU = 0, CAD = 0, CR = 0;
 
 void setup() {
-  // put your setup code here, to run once:
-  //servo motors
-  gripper.attach(10);
   gripper.attach(10, 0, 120);
-
-  armdown.attach(6);
   armdown.attach(6, 0, 120);
-
-  armup.attach(5);
   armup.attach(5, 0, 120);
-
-  rotator.attach(3);
   rotator.attach(3, 0, 360);
-  startpose();
 
-  //Leds
-  pinMode(0,OUTPUT);
-  pinMode(1,OUTPUT);
-  pinMode(2,OUTPUT);
- 
+  // LEDs
+  pinMode(7, OUTPUT);
+  pinMode(8, OUTPUT);
+  pinMode(9, OUTPUT);
+
+  startpose();
 }
 
 void loop() {
-  
-  delay(5000);
+  delay(500);
   firstPose();
-  delay(5000);
-  seconePose();
-  delay(5000);
-  startpose();
-  dealay(1000);
-   digitalWrite(0, LOW);
-   digitalWrite(1, LOW); 
-   digitalWrite(0, LOW); 
-  
+  delay(1000);
+  secondPose();
+  delay(1000);
 
+  digitalWrite(8, LOW);
+  digitalWrite(9, LOW);
 }
+
 void startpose() {
-  gripper.write(0);
-  armdown.write(0);
-  armup.write(0);
-  rotator.write(0);
-    digitalWrite(0, HIGH); 
+  digitalWrite(7, HIGH);
 
+  lowwrite(gripper, CG, 0);
+  lowwrite(armdown, CAD, 0);
+  lowwrite(armup, CAU, 0);
+  lowwrite(rotator, CR, 0);
 }
+
 void firstPose() {
-  gripper.write(90);
-  armdown.write(90);
-  armup.write(90);
-  rotator.write(90);
-    digitalWrite(1, HIGH);  // turn the LED on (HIGH is the voltage level)
+  digitalWrite(8, HIGH);
 
+  lowwrite(gripper, CG, 90);
+
+  lowwrite(armup, CAU, 90);
+  lowwrite(armdown, CAD, 90);
+
+  lowwrite(rotator, CR, 90);
+
+  lowwrite(armup, CAU, 90);  // اگر قراره دوباره ۹۰ باشه، حذف هم میشه
+  lowwrite(armdown, CAD, 90);
+
+  lowwrite(gripper, CG, 0);
 }
-void seconePose() {
-  gripper.write(120);
-  armdown.write(120);
-  armup.write(120);
-  rotator.write(120);
-    digitalWrite(2, HIGH);  // turn the LED on (HIGH is the voltage level)
 
+void secondPose() {
+  digitalWrite(9, HIGH);
+
+  lowwrite(armup, CAU, 90);
+  lowwrite(armdown, CAD, 90);
+
+  lowwrite(rotator, CR, 0);
+
+  lowwrite(gripper, CG, 0);
+
+  lowwrite(armup, CAU, 0);
+  lowwrite(armdown, CAD, 0);
+}
+
+void lowwrite(Servo& motor, int& local, int rotate) {
+  if (rotate > local) {
+    for (int i = local; i <= rotate; i++) {
+      motor.write(i);
+      delay(10);
+    }
+  } else {
+    for (int i = local; i >= rotate; i--) {
+      motor.write(i);
+      delay(10);
+    }
+  }
+  local = rotate;
 }
