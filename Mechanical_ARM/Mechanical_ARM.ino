@@ -49,7 +49,7 @@ void firstPose() {
 
   lowwrite(rotator, CR, 90);
 
-  lowwrite(armup, CAU, 90);  // اگر قراره دوباره ۹۰ باشه، حذف هم میشه
+  lowwrite(armup, CAU, 90);  
   lowwrite(armdown, CAD, 90);
 
   lowwrite(gripper, CG, 0);
