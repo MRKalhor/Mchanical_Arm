@@ -2,20 +2,25 @@
 
 Servo gripper, armdown, armup, rotator;
 
-// current positions
 int CG = 0, CAU = 0, CAD = 0, CR = 0;
+int speed = 20;
 
 void setup() {
-  gripper.attach(10, 0, 120);
-  armdown.attach(6, 0, 120);
-  armup.attach(5, 0, 120);
-  rotator.attach(3, 0, 360);
+  //serial
+  Serial.begin(9600);
 
-  // LEDs
+  //motor
+  gripper.attach(10);
+  armdown.attach(6);
+  armup.attach(5);
+  rotator.attach(3);
+
+  //led
   pinMode(7, OUTPUT);
   pinMode(8, OUTPUT);
   pinMode(9, OUTPUT);
 
+  //pose
   startpose();
 }
 
@@ -33,53 +38,56 @@ void loop() {
 void startpose() {
   digitalWrite(7, HIGH);
 
-  lowwrite(gripper, CG, 0);
-  lowwrite(armdown, CAD, 0);
-  lowwrite(armup, CAU, 0);
-  lowwrite(rotator, CR, 0);
+  lowwrite(gripper, CG, 0, 'G');
+  lowwrite(armdown, CAD, 0, 'D');
+  lowwrite(armup, CAU, 0, 'U');
+  lowwrite(rotator, CR, 0, 'R');
 }
 
 void firstPose() {
   digitalWrite(8, HIGH);
 
-  lowwrite(gripper, CG, 90);
+  lowwrite(gripper, CG, 90, 'G');
+  lowwrite(armup, CAU, 90, 'U');
+  lowwrite(armdown, CAD, 90, 'D');
+  lowwrite(rotator, CR, 90, 'R');
 
-  lowwrite(armup, CAU, 90);
-  lowwrite(armdown, CAD, 90);
-
-  lowwrite(rotator, CR, 90);
-
-  lowwrite(armup, CAU, 90);  // اگر قراره دوباره ۹۰ باشه، حذف هم میشه
-  lowwrite(armdown, CAD, 90);
-
-  lowwrite(gripper, CG, 0);
+  lowwrite(gripper, CG, 0, 'G');
 }
 
 void secondPose() {
   digitalWrite(9, HIGH);
 
-  lowwrite(armup, CAU, 90);
-  lowwrite(armdown, CAD, 90);
-
-  lowwrite(rotator, CR, 0);
-
-  lowwrite(gripper, CG, 0);
-
-  lowwrite(armup, CAU, 0);
-  lowwrite(armdown, CAD, 0);
+  lowwrite(armup, CAU, 90, 'U');
+  lowwrite(armdown, CAD, 90, 'D');
+  lowwrite(rotator, CR, 0, 'R');
+  lowwrite(gripper, CG, 0, 'G');
+  lowwrite(armup, CAU, 0, 'U');
+  lowwrite(armdown, CAD, 0, 'D');
 }
 
-void lowwrite(Servo& motor, int& local, int rotate) {
-  if (rotate > local) {
-    for (int i = local; i <= rotate; i++) {
+void lowwrite(Servo& motor, int& local, int target, char label) {
+  if (target > local) {
+
+    for (int i = local; i <= target; i++) {
+
       motor.write(i);
-      delay(10);
+      Serial.print(label);
+      Serial.print(":");
+      Serial.println(i);
+      delay(speed);
     }
+
   } else {
-    for (int i = local; i >= rotate; i--) {
+
+    for (int i = local; i >= target; i--) {
+
       motor.write(i);
-      delay(10);
+      Serial.print(label);
+      Serial.print(":");
+      Serial.println(i);
+      delay(speed);
     }
   }
-  local = rotate;
+  local = target;
 }
